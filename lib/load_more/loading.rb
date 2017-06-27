@@ -1,8 +1,8 @@
 require 'active_record'
+require 'load_more/per_load'
+
 module LoadMore
   module Loading
-    attr_accessor :per_load
-
     def load_more(last=nil, amount=nil, options={})
       options.reject!{ |k, v| not v.present? }
       opts = OPTS.merge(options)
@@ -16,16 +16,11 @@ module LoadMore
       if opts[:find_by] != :id
         last = self.pluck(opts[:find_by]).index(last) + 1 unless last == 0
         order = opts[:find_by].to_s + order
-        @find_by = opts[:find_by]
       else
         order.strip!
       end
 
       self.order(order).offset(last).limit(amount)
-    end
-
-    def self.per_load=(amount)
-      amount.nil? ? 10 : amount
     end
 
     private
@@ -62,9 +57,22 @@ module LoadMore
         end
       end
     end
-
   end
+
   ::ActiveRecord::Base.extend Loading
+  ::ActiveRecord::Base.extend PerLoad
+
+  klasses = [::ActiveRecord::Relation]
+  if defined? ::ActiveRecord::Associations::CollectionProxy
+    klasses << ::ActiveRecord::Associations::CollectionProxy
+  else
+    klasses << ::ActiveRecord::Associations::AssociationCollection
+  end
+
+  # support pagination on associations and scopes
+  klasses.each { |klass| klass.send(:include, Loading) }
+
+
 end
 
 

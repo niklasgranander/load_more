@@ -1,2 +1,18 @@
 <h1>Sample#index</h1>
 <p>Find me in app/views/sample/index.html.erb</p>
+<table>
+  <thead>
+    <th>ID</th><th>String</th><th>Created At</th>
+  </thead>
+  <tbody>
+    <% @entries.each do |e| %>
+      <tr>
+        <td><%= e.id %></td>
+        <td><%= e.string %></td>
+        <td><%= e.created_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= load_more_btn @entries %>

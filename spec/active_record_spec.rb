@@ -35,6 +35,10 @@ module LoadMore
         expect(Entry.all.load_more(2, 3)).to match_ids [*3..5]
       end
 
+      it 'should get first 3 items in descending order' do
+        expect(Entry.all.load_more(nil, 3, {desc: true})).to match_ids [*8..10].reverse
+      end
+
       it 'should get first 3 items in ActiveRecord::Associations::CollectionProxy' do
         expect(Entry.first.posts.load_more(nil, 3)).to match_ids [*1..3]
       end
@@ -46,34 +50,34 @@ module LoadMore
 
     describe 'By :string' do
       it 'should get first 3 items' do
-        expect(Entry.all.load_more(nil, 3, { find_by: :string }))
+        expect(Entry.all.load_more(nil, 3, { order_by: :string }))
             .to match_ids [*1..3]
       end
 
       it 'should get next 3 items' do
-        expect(Entry.all.load_more('c', 3, { find_by: :string }))
+        expect(Entry.all.load_more('c', 3, { order_by: :string }))
             .to match_ids [*4..6]
       end
 
       it 'should get first 3 items in Associations::CollectionProxy' do
-        expect(Entry.first.posts.load_more(nil, 3, { find_by: :string }))
+        expect(Entry.first.posts.load_more(nil, 3, { order_by: :string }))
             .to match_ids [*1..3]
       end
 
       it 'should get next 3 items in Associations::CollectionProxy' do
-        expect(Entry.first.posts.load_more('ac', 3, { find_by: :string }))
+        expect(Entry.first.posts.load_more('ac', 3, { order_by: :string }))
             .to match_ids [*4..6]
       end
     end
 
     describe 'Bad arguments' do
       it 'should only accept symbols for find_by' do
-        expect{ Entry.all.load_more(0, 3, { find_by: 'id' }) }
+        expect{ Entry.all.load_more(0, 3, { order_by: 'id' }) }
             .to raise_error ArgumentError
       end
 
       it 'should only accept column name in find_by' do
-        expect{ Entry.all.load_more(0, 3, { find_by: :abcd }) }
+        expect{ Entry.all.load_more(0, 3, { order_by: :abcd }) }
             .to raise_error ArgumentError
       end
 
